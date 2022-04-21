@@ -71,9 +71,23 @@ app.get('/cds-services', (request, response) => {
     prefetch: {
       // Request the Patient FHIR resource for the patient in context, where the EHR fills out the prefetch template
       // See details here: https://cds-hooks.org/specification/current/#prefetch-template
-      requestedPatient: 'Patient/{{context.patientId}}'
+      requestedPatient: 'Patient/{{context.patientId}}',
+      lastFluVaccine: 'Immunization?patient={{context.patientId}}&status=completed&vaccine-code:text=flu,influenza&_sort=-date'
     }
   };
+
+  const fluVaccineReminder = {
+    hook: 'flu-vaccine',
+    id: 'flu-vaccine-example',
+    title: 'Example flu-vaccine CDS Service',
+    description: 'Suggests clinician to recommend flu vaccine',
+    prefetch: {
+      // Request the Patient FHIR resource for the patient in context, where the EHR fills out the prefetch template
+      // See details here: https://cds-hooks.org/specification/current/#prefetch-template
+      requestedPatient: 'Patient/{{context.patientId}}',
+      lastFluVaccine: 'Immunization?patient={{context.patientId}}&status=completed&vaccine-code:text=flu,influenza&_sort=-date'
+    }
+  }; 
 
   // Example service to invoke the order-select hook
   const orderSelectExample = {
@@ -84,7 +98,7 @@ app.get('/cds-services', (request, response) => {
   };
 
   const discoveryEndpointServices = {
-    services: [ patientViewExample, orderSelectExample ]
+    services: [ patientViewExample, orderSelectExample, fluVaccineReminder ]
   };
   response.send(JSON.stringify(discoveryEndpointServices, null, 2));
 });
@@ -96,10 +110,11 @@ app.get('/cds-services', (request, response) => {
  *
  * - Service purpose: Display a patient's first and last name, with a link to the CDS Hooks web page
  */
-app.post('/cds-services/patient-view-example', (request, response) => {
+ app.post('/cds-services/patient-view-example', (request, response) => {
 
   // Parse the request body for the Patient prefetch resource
   const patientResource = request.body.prefetch.requestedPatient;
+  const vaccineResource = request.body.prefetch.lastFluVaccine;
   const patientViewCard = {
     cards: [
       {
@@ -117,10 +132,64 @@ app.post('/cds-services/patient-view-example', (request, response) => {
             type: 'absolute'
           }
         ]
+      },
+      {
+        // show vaccine info
+        summary: 'Latest Influenza Vaccine: ' + vaccineResource.total,
+        indicator: 'info',
+        source: {
+          label: 'CDS Service Tutorial',
+          url: 'https://github.com/cerner/cds-services-tutorial/wiki/Patient-View-Service'
+        },
+        links: [
+          {
+            label: 'Learn more about the flu vaccine',
+            url: 'https://www.cdc.gov/flu/prevent/vaccinations.htm',
+            type: 'absolute'
+          }
+        ]
       }
     ]
   };
   response.send(JSON.stringify(patientViewCard, null, 2));
+});
+
+/**
+ * Flu Vaccine Example Service:
+ * - Handles POST requests to our flu-vaccine-example endpoint
+ * - This function should respond with an array of card(s) in JSON format for the flu-vaccine hook
+ *
+ * - Service purpose: Display a patient's first and last name, with a link to the CDS Hooks web page
+ */
+ app.post('/cds-services/flu-vaccine-example', (request, response) => {
+
+  // Parse the request body for the Patient prefetch resource
+  const patientResource = request.body.prefetch.requestedPatient;
+  const vaccineResource = request.body.prefetch.lastFluVaccine;
+  const vaccineViewCard = {
+    cards: [
+      {
+        // Use the patient's First and Last name
+        summary: 'Latest Influenza Vaccine: ' + vaccineResource[0].occurrenceDateTime,
+        indicator: 'info',
+        source: {
+          label: 'CDS Service Tutorial',
+          url: 'https://github.com/cerner/cds-services-tutorial/wiki/Patient-View-Service'
+        },
+        links: [
+          {
+            label: 'Learn more about CDS Hooks',
+            url: 'https://cds-hooks.org',
+            type: 'absolute'
+          }
+        ]
+      }, 
+      {
+        summary: ''
+      }
+    ]
+  };
+  response.send(JSON.stringify(vaccineViewCard, null, 2));
 });
 
 /**
