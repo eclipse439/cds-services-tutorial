@@ -71,20 +71,18 @@ app.get('/cds-services', (request, response) => {
     prefetch: {
       // Request the Patient FHIR resource for the patient in context, where the EHR fills out the prefetch template
       // See details here: https://cds-hooks.org/specification/current/#prefetch-template
-      requestedPatient: 'Patient/{{context.patientId}}',
-      lastFluVaccine: 'Immunization?patient={{context.patientId}}&status=completed&vaccine-code:text=flu,influenza&_sort=-date'
+      requestedPatient: 'Patient/{{context.patientId}}'
     }
   };
 
   const fluVaccineReminder = {
-    hook: 'flu-vaccine',
-    id: 'flu-vaccine-example',
+    hook: 'patient-view',
+    id: 'patient-flu-vaccine-example',
     title: 'Example flu-vaccine CDS Service',
     description: 'Suggests clinician to recommend flu vaccine',
     prefetch: {
       // Request the Patient FHIR resource for the patient in context, where the EHR fills out the prefetch template
       // See details here: https://cds-hooks.org/specification/current/#prefetch-template
-      requestedPatient: 'Patient/{{context.patientId}}',
       lastFluVaccine: 'Immunization?patient={{context.patientId}}&status=completed&vaccine-code:text=flu,influenza&_sort=-date'
     }
   }; 
@@ -114,7 +112,6 @@ app.get('/cds-services', (request, response) => {
 
   // Parse the request body for the Patient prefetch resource
   const patientResource = request.body.prefetch.requestedPatient;
-  const vaccineResource = request.body.prefetch.lastFluVaccine;
   const patientViewCard = {
     cards: [
       {
@@ -132,22 +129,6 @@ app.get('/cds-services', (request, response) => {
             type: 'absolute'
           }
         ]
-      },
-      {
-        // show vaccine info
-        summary: 'Latest Influenza Vaccine: ' + vaccineResource.total,
-        indicator: 'info',
-        source: {
-          label: 'CDS Service Tutorial',
-          url: 'https://github.com/cerner/cds-services-tutorial/wiki/Patient-View-Service'
-        },
-        links: [
-          {
-            label: 'Learn more about the flu vaccine',
-            url: 'https://www.cdc.gov/flu/prevent/vaccinations.htm',
-            type: 'absolute'
-          }
-        ]
       }
     ]
   };
@@ -161,16 +142,15 @@ app.get('/cds-services', (request, response) => {
  *
  * - Service purpose: Display a patient's first and last name, with a link to the CDS Hooks web page
  */
- app.post('/cds-services/flu-vaccine-example', (request, response) => {
+ app.post('/cds-services/patient-flu-vaccine-example', (request, response) => {
 
   // Parse the request body for the Patient prefetch resource
-  const patientResource = request.body.prefetch.requestedPatient;
   const vaccineResource = request.body.prefetch.lastFluVaccine;
   const vaccineViewCard = {
     cards: [
       {
         // Use the patient's First and Last name
-        summary: 'Latest Influenza Vaccine: ' + vaccineResource[0].occurrenceDateTime,
+        summary: 'Latest Influenza Vaccine: ' + vaccineResource.total,
         indicator: 'info',
         source: {
           label: 'CDS Service Tutorial',
@@ -183,9 +163,6 @@ app.get('/cds-services', (request, response) => {
             type: 'absolute'
           }
         ]
-      }, 
-      {
-        summary: ''
       }
     ]
   };
