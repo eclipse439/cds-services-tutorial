@@ -85,7 +85,7 @@ app.get('/cds-services', (request, response) => {
       // See details here: https://cds-hooks.org/specification/current/#prefetch-template
       lastFluVaccine: 'Immunization?patient={{context.patientId}}&status=completed&vaccine-code:text=flu,influenza&_sort=-date'
     }
-  }; 
+  };
 
   // Example service to invoke the order-select hook
   const orderSelectExample = {
@@ -96,7 +96,7 @@ app.get('/cds-services', (request, response) => {
   };
 
   const discoveryEndpointServices = {
-    services: [ patientViewExample, orderSelectExample, fluVaccineReminder ]
+    services: [patientViewExample, orderSelectExample, fluVaccineReminder]
   };
   response.send(JSON.stringify(discoveryEndpointServices, null, 2));
 });
@@ -108,7 +108,7 @@ app.get('/cds-services', (request, response) => {
  *
  * - Service purpose: Display a patient's first and last name, with a link to the CDS Hooks web page
  */
- app.post('/cds-services/patient-view-example', (request, response) => {
+app.post('/cds-services/patient-view-example', (request, response) => {
 
   // Parse the request body for the Patient prefetch resource
   const patientResource = request.body.prefetch.requestedPatient;
@@ -142,32 +142,61 @@ app.get('/cds-services', (request, response) => {
  *
  * - Service purpose: Display a patient's first and last name, with a link to the CDS Hooks web page
  */
- app.post('/cds-services/patient-flu-vaccine-example', (request, response) => {
+app.post('/cds-services/patient-flu-vaccine-example', (request, response) => {
 
   // Parse the request body for the Patient prefetch resource
   const vaccineResource = request.body.prefetch.lastFluVaccine;
-  const vaccineViewCard = {
-    cards: [
-      {
-        // Use the patient's First and Last name
-        summary: 'Latest Influenza Vaccine: ' + vaccineResource.total,
-        indicator: 'info',
-        source: {
-          label: 'CDS Service Tutorial',
-          url: 'https://github.com/cerner/cds-services-tutorial/wiki/Patient-View-Service'
-        },
-        links: [
-          {
-            label: 'Learn more about CDS Hooks',
-            url: 'https://cds-hooks.org',
-            type: 'absolute'
-          }
-        ]
-      }
-    ]
-  };
+  const vaccineViewCard = createVaccineResponseCard(vaccineResource);
   response.send(JSON.stringify(vaccineViewCard, null, 2));
 });
+
+function createVaccineResponseCard(context) {
+  const fluVaccineOnFile = context.total;
+
+  // Check if any flu vaccines are on file
+  if (fluVaccineOnFile) {
+    // Return this card if the provider has already chosen this specific medication to prescribe,
+    // or the provider has chosen the suggestion to switch to this specific medication already
+    return {
+      cards: [
+        {
+          summary: 'Flu vaccine up to date!',
+          indicator: 'info',
+          source: {
+            label: 'CDS Service Tutorial',
+            url: 'https://github.com/cerner/cds-services-tutorial/wiki/Order-Select-Service'
+          }
+        }
+      ]
+    };
+  } else {
+    // No vaccine on file
+    return {
+      cards: [
+        {
+          // Vaccine popup for flu vaccine
+          summary: 'Flu vaccine recommended!',
+          indicator: 'info',
+          detail: 'This patient currently has no flu vaccine on file.',
+          source: {
+            label: 'CDS Service Tutorial',
+            url: 'https://github.com/cerner/cds-services-tutorial/wiki/Patient-View-Service'
+          },
+          links: [
+            {
+              label: 'Flu Vaccine Key Facts',
+              url: 'https://www.cdc.gov/flu/prevent/keyfacts.htm',
+              type: 'absolute'
+            }
+          ]
+        }
+      ]
+    };
+  };
+
+
+}
+
 
 /**
  * Order Select Example Service:
