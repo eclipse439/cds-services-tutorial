@@ -75,9 +75,10 @@ app.get('/cds-services', (request, response) => {
     }
   };
 
+  // Flu Vaccine service invoking patient-view hook
   const fluVaccineReminder = {
     hook: 'patient-view',
-    id: 'patient-flu-vaccine-example',
+    id: 'patient-flu-vaccine',
     title: 'Example flu-vaccine CDS Service',
     description: 'Suggests clinician to recommend flu vaccine',
     prefetch: {
@@ -138,9 +139,9 @@ app.post('/cds-services/patient-view-example', (request, response) => {
 /**
  * Flu Vaccine Example Service:
  * - Handles POST requests to our flu-vaccine-example endpoint
- * - This function should respond with an array of card(s) in JSON format for the flu-vaccine hook
+ * - This function should respond with an array of card(s) in JSON format for the patient-view hook
  *
- * - Service purpose: Display a patient's first and last name, with a link to the CDS Hooks web page
+ * - Service purpose: Display a recommendation to the provider if a patient is behind on their flu vaccinations.
  */
 app.post('/cds-services/patient-flu-vaccine-example', (request, response) => {
 
@@ -155,12 +156,12 @@ function createVaccineResponseCard(context) {
 
   // Check if any flu vaccines are on file
   if (fluVaccineOnFile) {
-    // Return this card if the provider has already chosen this specific medication to prescribe,
-    // or the provider has chosen the suggestion to switch to this specific medication already
+    // Return this card if the patient already has a flu vaccine < 9 months
     return {
       cards: [
         {
           summary: 'Flu vaccine up to date!',
+          detail: 'Last vaccine was on ' + context.occurenceDateTime + '.',
           indicator: 'info',
           source: {
             label: 'CDS Service Tutorial',
