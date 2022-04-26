@@ -65,7 +65,7 @@ app.get('/cds-services', (request, response) => {
   // Flu Vaccine service invoking patient-view hook
   const fluVaccineReminder = {
     hook: 'patient-view',
-    id: 'patient-flu-vaccine',
+    id: 'patient-vaccine-reminder',
     title: 'Example flu-vaccine CDS Service',
     description: 'Suggests clinician to recommend flu vaccine',
     prefetch: {
@@ -88,7 +88,7 @@ app.get('/cds-services', (request, response) => {
  *
  * - Service purpose: Display a recommendation to the provider if a patient is behind on their flu vaccinations.
  */
-app.post('/cds-services/patient-flu-vaccine', (request, response) => {
+app.post('/cds-services/patient-vaccine-reminder', (request, response) => {
 
   // Parse the request body for the Patient prefetch resource
   const vaccineResource = request.body.prefetch.lastFluVaccine;
