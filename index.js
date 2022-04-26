@@ -10,7 +10,7 @@ app.use(bodyParser.json());
  * - CDS Services must implement CORS in order to be called from a web browser
  */
 app.use((request, response, next) => {
-  response.setHeader('Access-Control-Allow-Origin', '*');
+  response.setHeader('Access-Control-Allow-Origin', 'https://sandbox.cds-hooks.org');
   response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   response.setHeader('Access-Control-Allow-Credentials', 'true');
   response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -62,6 +62,30 @@ app.use((request, response, next) => {
  */
 app.get('/cds-services', (request, response) => {
 
+  // Example service to invoke the patient-view hook
+  const patientViewExample = {
+    hook: 'patient-view',
+    id: 'patient-view-example',
+    title: 'Example patient-view CDS Service',
+    description: 'Displays the name of the patient',
+    prefetch: {
+      // Request the Patient FHIR resource for the patient in context, where the EHR fills out the prefetch template
+      // See details here: https://cds-hooks.org/specification/current/#prefetch-template
+      requestedPatient: 'Patient/{{context.patientId}}'
+    }
+  };
+
+  // Hypertension Warning Card
+  const patientHypertensionWarning = {
+    hook: 'patient-view',
+    id: 'patient-hypertension-warning',
+    title: 'Patient Hypertension Warning Service',
+    description: 'Displays alert if patient has hypertension condition',
+    prefetch: {
+      patientHypertensionCondition: 'Condition?patient={{context.patientId}}&code=http://snomed.info/sct|1201005'
+    }
+  }
+
   // Flu Vaccine service invoking patient-view hook
   const fluVaccineReminder = {
     hook: 'patient-view',
@@ -76,9 +100,83 @@ app.get('/cds-services', (request, response) => {
   };
 
   const discoveryEndpointServices = {
-    services: [fluVaccineReminder]
+    services: [patientViewExample, patientHypertensionWarning, fluVaccineReminder]
   };
   response.send(JSON.stringify(discoveryEndpointServices, null, 2));
+});
+
+/**
+ * Hypertension Warning Service:
+ * - Handles POST requests to our patient-hypertension-warning endpoint
+ * - This function should respond with an array of card(s) in JSON format for the patient-view hook
+ *
+ * - Service purpose: Display whether a patient has hypertension or not
+ */
+ app.post('/cds-services/patient-hypertension-warning', (request, response) => {
+
+  // Parse the request body for the Patient prefetch resource
+  const hypertensionQuery = request.body.prefetch.patientHypertensionCondition;
+  if(hypertensionQuery.total) {
+    // create and return hypertension warning
+    const hypertensionCard = {
+      cards: [
+        {
+          // Use the patient's First and Last name
+          summary: 'Hypertension Warning',
+          detail: '*This patient has hypertension.* <br />**Onset:** ' + hypertensionQuery.entry[0].resource.onsetDateTime + ", **Last Updated:** " + hypertensionQuery.entry[0].resource.meta.lastUpdated,
+          indicator: 'warning',
+          source: {
+            label: 'CDS Service Tutorial',
+            url: 'https://github.com/cerner/cds-services-tutorial/wiki/Patient-View-Service'
+          },
+          links: [
+            {
+              label: 'Hypertension Key Facts',
+              url: 'https://www.cdc.gov/bloodpressure/facts.htm',
+              type: 'absolute'
+            }
+          ]
+        }
+      ]
+    };
+    response.send(JSON.stringify(hypertensionCard, null, 2));
+  }
+  response.status(200);
+});
+
+/**
+ * Example Patient View Service:
+ * - Handles POST requests to our patient-view-example endpoint
+ * - This function should respond with an array of card(s) in JSON format for the patient-view hook
+ *
+ * - Service purpose: Display a patient's first and last name, with a link to the CDS Hooks web page
+ */
+ app.post('/cds-services/patient-view-example', (request, response) => {
+
+  // Parse the request body for the Patient prefetch resource
+  const patientResource = request.body.prefetch.requestedPatient;
+  const patientViewCard = {
+    cards: [
+      {
+        // Use the patient's First and Last name
+        summary: 'Now seeing: ' + patientResource.name[0].given[0] + ' ' + patientResource.name[0].family[0],
+        detail: 'Birthdate: ' + patientResource.birthDate,
+        indicator: 'info',
+        source: {
+          label: 'CDS Service Tutorial',
+          url: 'https://github.com/cerner/cds-services-tutorial/wiki/Patient-View-Service'
+        },
+        links: [
+          {
+            label: 'Learn more about CDS Hooks',
+            url: 'https://cds-hooks.org',
+            type: 'absolute'
+          }
+        ]
+      }
+    ]
+  };
+  response.send(JSON.stringify(patientViewCard, null, 2));
 });
 
 /**
@@ -123,7 +221,7 @@ function createVaccineResponseCard(context) {
         {
           // Vaccine popup for flu vaccine
           summary: 'Flu vaccine recommended!',
-          indicator: 'info',
+          indicator: 'warning',
           detail: 'This patient currently has no flu vaccine on file.',
           source: {
             label: 'CDS Service Tutorial',
