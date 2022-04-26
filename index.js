@@ -71,7 +71,8 @@ app.get('/cds-services', (request, response) => {
     prefetch: {
       // Request the Patient FHIR resource for the patient in context, where the EHR fills out the prefetch template
       // See details here: https://cds-hooks.org/specification/current/#prefetch-template
-      requestedPatient: 'Patient/{{context.patientId}}'
+      requestedPatient: 'Patient/{{context.patientId}}',
+      lastFluVaccine: 'Immunization?patient={{context.patientId}}&status=completed&vaccine-code:text=flu,influenza&_sort=-date'
     }
   };
 
@@ -84,6 +85,7 @@ app.get('/cds-services', (request, response) => {
     prefetch: {
       // Request the Patient FHIR resource for the patient in context, where the EHR fills out the prefetch template
       // See details here: https://cds-hooks.org/specification/current/#prefetch-template
+      // patient: 'Patient/{{context.patientId}}',
       lastFluVaccine: 'Immunization?patient={{context.patientId}}&status=completed&vaccine-code:text=flu,influenza&_sort=-date'
     }
   };
@@ -113,11 +115,12 @@ app.post('/cds-services/patient-view-example', (request, response) => {
 
   // Parse the request body for the Patient prefetch resource
   const patientResource = request.body.prefetch.requestedPatient;
+  const lastVaccines = request.body.prefetch.lastFluVaccine;
   const patientViewCard = {
     cards: [
       {
         // Use the patient's First and Last name
-        summary: 'Now seeing: ' + patientResource.name[0].given[0] + ' ' + patientResource.name[0].family[0],
+        summary: 'Now seeing: ' + patientResource.name[0].given[0] + ' ' + patientResource.name[0].family[0] + ' with ' + lastVaccines.total + ' on record',
         indicator: 'info',
         source: {
           label: 'CDS Service Tutorial',
@@ -143,12 +146,13 @@ app.post('/cds-services/patient-view-example', (request, response) => {
  *
  * - Service purpose: Display a recommendation to the provider if a patient is behind on their flu vaccinations.
  */
-app.post('/cds-services/patient-flu-vaccine-example', (request, response) => {
+app.post('/cds-services/patient-flu-vaccine', (request, response) => {
 
   // Parse the request body for the Patient prefetch resource
   const vaccineResource = request.body.prefetch.lastFluVaccine;
   const vaccineViewCard = createVaccineResponseCard(vaccineResource);
   response.send(JSON.stringify(vaccineViewCard, null, 2));
+  response.status(200);
 });
 
 function createVaccineResponseCard(context) {
