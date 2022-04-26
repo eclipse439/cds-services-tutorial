@@ -88,12 +88,13 @@ app.get('/cds-services', (request, response) => {
  *
  * - Service purpose: Display a recommendation to the provider if a patient is behind on their flu vaccinations.
  */
-app.post('/cds-services/patient-flu-vaccine-example', (request, response) => {
+app.post('/cds-services/patient-flu-vaccine', (request, response) => {
 
   // Parse the request body for the Patient prefetch resource
   const vaccineResource = request.body.prefetch.lastFluVaccine;
   const vaccineViewCard = createVaccineResponseCard(vaccineResource);
   response.send(JSON.stringify(vaccineViewCard, null, 2));
+  response.status(200);
 });
 
 function createVaccineResponseCard(context) {
