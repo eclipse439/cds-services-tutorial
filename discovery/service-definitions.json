@@ -5,25 +5,7 @@
         "title": "Example patient-view CDS Service",
         "description": "Displays the name of the patient",
         "prefetch": {
-          "requestedPatient": "Patient/{{context.patientId}}"
-        }
-    },
-    {
-        "hook": "patient-view",
-        "id": "patient-hypertension-warning",
-        "title": "Patient Hypertension Warning Service",
-        "description": "Displays alert if patient has hypertension condition",
-        "prefetch": {
-          "patientHypertensionCondition": "Condition?patient={{context.patientId}}&code=http://snomed.info/sct|1201005"
-        }
-    },
-    {
-        "hook": "patient-view",
-        "id": "patient-vaccine-reminder",
-        "title": "Example flu-vaccine CDS Service",
-        "description": "Suggests clinician to recommend flu vaccine",
-        "prefetch": {
-          "lastFluVaccine": "Immunization?patient={{context.patientId}}&status=completed&vaccine-code:text=flu,influenza&_sort=-date"
+          "patient": "Patient/{{context.patientId}}"
         }
     }
 ]

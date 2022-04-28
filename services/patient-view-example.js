@@ -1,6 +1,5 @@
 const express = require("express");
 const axios = require("axios");
-const { v4: uuidv4 } = require("uuid");
 
 const router = express.Router();
 
@@ -10,6 +9,7 @@ function isDataAvailable(patient) {
     patient.name[0] &&
     patient.name[0].given &&
     patient.name[0].given[0] &&
+    patient.name[0].family &&
     patient.name[0].family[0] &&
     patient.birthDate
   );
@@ -41,14 +41,13 @@ function retrievePatientResource(fhirServer, patientId, accessToken) {
 }
 
 function buildCard(patient) {
-  const name = patient.name[0].given[0] + ' ' + patientResource.name[0].family[0];
+  const name = patient.name[0].given[0] + ' ' + patient.name[0].family[0];
   const birthdate = patient.birthDate;
   return {
     cards: [
       {
-        uuid: uuidv4(),
         summary: `Now seeing: ${name}`,
-        detail: 'Birthdate: ' + patientResource.birthDate,
+        detail: 'Birthdate: ' + birthdate,
         source: {
           label: "Patient greeting service",
         },
@@ -83,8 +82,9 @@ router.post("/", (request, response) => {
     response.sendStatus(412);
     return;
   }
-  const resource = request.body.prefetch.patient;
-  response.json(buildCard(resource));
+  const patientResource = request.body.prefetch.patient;
+  const patientViewCard = buildCard(patientResource);
+  response.status(200).send(JSON.stringify(patientViewCard, null, 2));
 });
 
 module.exports = router;

@@ -31,4 +31,6 @@ app.use((request, response, next) => {
 // Handle specified errors or return a 500 for internal errors
 app.use(errorHandler);
 
+app.listen(3000);
+
 module.exports = app;
