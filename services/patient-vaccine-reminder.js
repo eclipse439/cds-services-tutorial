@@ -48,8 +48,7 @@ function buildCard(immunizations) {
           detail: 'Last vaccine was on ' + immunizations.occurenceDateTime + '.',
           indicator: 'info',
           source: {
-            label: 'CDS Service Tutorial',
-            url: 'https://github.com/cerner/cds-services-tutorial/wiki/Order-Select-Service'
+            label: 'CDS Service Tutorial'
           }
         }
       ]
@@ -63,8 +62,7 @@ function buildCard(immunizations) {
           indicator: 'warning',
           detail: 'This patient currently has no flu vaccine on file.',
           source: {
-            label: 'CDS Service Tutorial',
-            url: 'https://github.com/cerner/cds-services-tutorial/wiki/Patient-View-Service'
+            label: 'CDS Service Tutorial'
           },
           links: [
             {
