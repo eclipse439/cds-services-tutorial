@@ -1,4 +1,5 @@
 const express = require("express");
+const services = require("patient_card_cds");
 const bodyParser = require("body-parser");
 const cdsServices = require("./discovery/cds-services");
 const defaultCors = require("./middleware/default-cors");
@@ -19,6 +20,7 @@ app.use(defaultCors);
 app.set("json spaces", "  ");
 
 app.use("/cds-services", cdsServices);
+app.use(services);
 
 
 app.use((request, response, next) => {

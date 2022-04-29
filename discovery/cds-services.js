@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const serviceDefinitions = require("./service-definitions");
-const patientViewExample = require("../services/patient-view-example");
+const patientViewExample = require("patient_card_cds");
 // const patientHypertensionWarning = require("../services/patient-hypertension-warning");
 // const patientVaccineReminder = require("../services/patient-vaccine-reminder");
 
