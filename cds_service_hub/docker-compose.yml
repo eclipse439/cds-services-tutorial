@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    volumes:
+      - .:/usr/src/app/
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+
+  npm_registry:
+    image: verdaccio/verdaccio:4.4.0
+    container_name: "verdaccio"
+    environment:
+      - VERDACCIO_PORT=4873
+    ports:
+      - "4873:4873"
+    volumes:
+      - "./storage:/verdaccio/storage"
+      # - "./config:/verdaccio/conf"
+      - "./plugins:/verdaccio/plugins"  
