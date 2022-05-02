@@ -3,25 +3,30 @@ version: '3'
 services:
   app:
     build: .
+    container_name: "cds_service"
     volumes:
-      - .:/usr/src/app/
+      - ./cds_service_hub:/usr/src/app/
       - /usr/src/app/node_modules
-    ports:
-      - "3000:3000"
-
-  npm_registry:
-    image: verdaccio/verdaccio:4.4.0
-    container_name: "verdaccio"
     networks:
       - node-network
+    ports:
+      - "3000:3000"
+    depends_on:
+      - npm_registry
+
+  npm_registry:
+    image: verdaccio/verdaccio:5
+    container_name: "verdaccio"
     environment:
       - VERDACCIO_PORT=4873
+    networks:
+      - node-network
     ports:
       - "4873:4873"
     volumes:
-      - "./storage:/verdaccio/storage"
-      - "./config:/verdaccio/conf"
-      - "./plugins:/verdaccio/plugins"  
+      - "./verdacchio/storage:/verdaccio/storage"
+      - "./verdacchio/conf:/verdaccio/conf"
+      - "./verdacchio/plugins:/verdaccio/plugins"  
 
 networks:
   node-network:

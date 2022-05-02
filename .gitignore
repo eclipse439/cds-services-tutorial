@@ -35,3 +35,8 @@ jspm_packages
 
 # Optional REPL history
 .node_repl_history
+
+# verdaccio data
+*.verdaccio-db.json
+verdacchio/conf/htpasswd
+verdacchio/conf/storage

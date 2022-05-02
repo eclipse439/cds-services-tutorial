@@ -2,8 +2,8 @@ FROM node:alpine
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY ./cds_service_hub/package*.json ./
 RUN npm install
 
-EXPOSE 3000 4873
+EXPOSE 3000
 CMD [ "npm", "run", "start-server", "start" ]
