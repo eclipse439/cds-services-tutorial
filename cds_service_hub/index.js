@@ -1,5 +1,5 @@
 const express = require("express");
-// const services = require("patient_card_cds");
+const services = require("patient_card_cds");
 const bodyParser = require("body-parser");
 const cdsServices = require("./discovery/cds-services");
 const defaultCors = require("./middleware/default-cors");

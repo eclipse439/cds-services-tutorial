@@ -1,19 +1,6 @@
 version: '3'
 
 services:
-  app:
-    build: .
-    container_name: "cds_service"
-    volumes:
-      - ./cds_service_hub:/usr/src/app/
-      - /usr/src/app/node_modules
-    networks:
-      - node-network
-    ports:
-      - "3000:3000"
-    depends_on:
-      - npm_registry
-
   npm_registry:
     image: verdaccio/verdaccio:5
     container_name: "verdaccio"
@@ -27,6 +14,22 @@ services:
       - "./verdacchio/storage:/verdaccio/storage"
       - "./verdacchio/conf:/verdaccio/conf"
       - "./verdacchio/plugins:/verdaccio/plugins"  
+  app:
+    build: .
+    container_name: "cds_service"
+    volumes:
+      - ./cds_service_hub:/usr/src/app/
+      - /usr/src/app/node_modules
+    networks:
+      - node-network
+    ports:
+      - "3000:3000"
+    depends_on:
+      npm_registry:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  
 
 networks:
   node-network:
