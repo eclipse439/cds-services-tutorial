@@ -26,8 +26,5 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.16"
-  },
-  "publishConfig": {
-    "registry": "http://localhost:4873"
   }
 }
