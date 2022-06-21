@@ -24,10 +24,10 @@ services:
       - node-network
     ports:
       - "3000:3000"
-    depends_on:
-      npm_registry:
-        condition: service_completed_successfully
-    restart: unless-stopped
+    # depends_on:
+    #   npm_registry:
+    #     condition: service_completed_successfully
+    # restart: unless-stopped
 
   
 
